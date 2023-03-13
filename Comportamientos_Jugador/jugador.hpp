@@ -9,6 +9,7 @@ struct state
   int fil;
   int col;
   Orientacion brujula;
+  
 };
 
 class ComportamientoJugador : public Comportamiento{

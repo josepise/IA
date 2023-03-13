@@ -1,5 +1,6 @@
 #include "../Comportamientos_Jugador/jugador.hpp"
 #include <iostream>
+
 using namespace std;
 
 
@@ -58,6 +59,20 @@ Action ComportamientoJugador::think(Sensores sensores){
 		current_state.brujula = sensores.sentido;
 		bien_situado=true;
 	}
+	else if(current_state.brujula==norte)
+	{
+		int buff;
+		bool encontrado=false;
+
+		for(int i=0 ; i<12 && encontrado; i++)
+		{
+			if(sensores.terreno[i]=='G')
+			{
+				buff=i;
+				encontrado=true;
+			}
+		}
+	}
 
 	if(bien_situado)
 	{
@@ -86,13 +101,20 @@ Action ComportamientoJugador::think(Sensores sensores){
 	}
 	else if (!girar_derecha)
 	{
-		accion=actTURN_SL;
 		girar_derecha=(rand()%2==0);
+		if(!girar_derecha)
+			accion=actTURN_SL;
+		else 
+			accion=actTURN_BL;
 	}
 	else
 	{
-		accion=actTURN_SR;
 		girar_derecha=(rand()%2==0);
+
+		if(!girar_derecha)
+			accion=actTURN_SR;
+		else 
+			accion=actTURN_BR;
 	}
 
 	cout << "Terreno: ";
@@ -169,6 +191,116 @@ void ComportamientoJugador:: PonerTerrenoEnMatriz(const vector<unsigned char> &t
 				{
 					matriz[st.fil+i][st.col-e]=terreno[casilla];
 					casilla++;
+				}
+			}
+			break;
+		
+		case noreste:
+			for(int d=0; d < 4 ; d++)
+			{
+				if (d==0) 
+				{
+					matriz[st.fil][st.col]=terreno[casilla];
+					casilla++;
+				}
+				else{
+
+					for(int c=0; c<d; c++)
+					{
+						matriz[st.fil-d][st.col+c]=terreno[casilla];
+						casilla++;
+					}
+
+					for(int f=0; f<=d; f++)
+					{
+						matriz[st.fil-d+f][st.col+d]=terreno[casilla];
+						casilla++;
+					}
+
+					
+					
+				}
+			}
+			break;
+	
+		case noroeste:
+			for(int d=0; d < 4 ; d++)
+			{
+				if (d==0) 
+				{
+					matriz[st.fil][st.col]=terreno[casilla];
+					casilla++;
+				}
+				else{
+
+					for(int c=0; c<d; c++)
+					{
+						matriz[st.fil-c][st.col-d]=terreno[casilla];
+						casilla++;
+					}
+
+					for(int f=0; f<=d; f++)
+					{
+						matriz[st.fil-d][st.col-d+f]=terreno[casilla];
+						casilla++;
+					}
+					
+				}
+			}
+			break;
+		
+		case sureste:
+			for(int d=0; d < 4 ; d++)
+			{
+				if (d==0) 
+				{
+					matriz[st.fil][st.col]=terreno[casilla];
+					casilla++;
+				}
+				else{
+
+					for(int c=0; c<d; c++)
+					{
+						matriz[st.fil+d][st.col+c]=terreno[casilla];
+						casilla++;
+					}
+
+					for(int f=0; f<=d; f++)
+					{
+						matriz[st.fil+d][st.col+d-f]=terreno[casilla];
+						casilla++;
+					}
+
+					
+					
+				}
+			}
+			break;
+		
+		case suroeste:
+			for(int d=0; d < 4 ; d++)
+			{
+				if (d==0) 
+				{
+					matriz[st.fil][st.col]=terreno[casilla];
+					casilla++;
+				}
+				else{
+
+					for(int c=0; c<d; c++)
+					{
+						matriz[st.fil+d][st.col-c]=terreno[casilla];
+						casilla++;
+					}
+
+					for(int f=0; f<=d; f++)
+					{
+						matriz[st.fil+d-f][st.col-d]=terreno[casilla];
+						casilla++;
+					}
+
+					
+					
 				}
 			}
 			break;
