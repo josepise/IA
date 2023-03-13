@@ -172,6 +172,29 @@ void ComportamientoJugador:: PonerTerrenoEnMatriz(const vector<unsigned char> &t
 				}
 			}
 			break;
+
+		case noreste:
+			for(int d=0; d<4; d++)
+			{
+				if(d!=0)
+				{
+					for(int e=0; e<=d; e++)
+					{
+						matriz[st.fil-d][st.col+e]=terreno[casilla];
+						casilla++;
+					}
+					for(int i=d; i>=st.fil ; i--)
+					{
+						matriz[st.fil-i][st.col+d]=terreno[casilla];
+						casilla++;
+					}
+				}
+				else
+				{
+					matriz[st.fil][st.col]=terreno[casilla];
+					casilla++;
+				}
+			}
 		default:
 			matriz[st.fil][st.col]=terreno[0];
 			break;

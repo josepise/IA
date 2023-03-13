@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/josepise/practica1/IA
+CMAKE_SOURCE_DIR = /home/josepise/IA
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/josepise/practica1/IA
+CMAKE_BINARY_DIR = /home/josepise/IA
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -80,9 +80,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/josepise/practica1/IA/CMakeFiles /home/josepise/practica1/IA/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/josepise/IA/CMakeFiles /home/josepise/IA/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/josepise/practica1/IA/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/josepise/IA/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
