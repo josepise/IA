@@ -1,5 +1,6 @@
 #include "../Comportamientos_Jugador/jugador.hpp"
 #include <iostream>
+#include <cmath>
 
 using namespace std;
 
@@ -107,18 +108,38 @@ Action ComportamientoJugador::think(Sensores sensores){
 	}
 	else if (sensores.terreno[2]== 'M' or (sensores.terreno[1]== 'M' and sensores.terreno[2]== 'M'))
 	{
-		int casillas_n=3, casillas_g=;
-		int muros=0;
+		int casillas_n=3, casillas_g=4;
+		int muros=0 , espacios=0;
 		if(current_state.brujula%2 == 0)
 		{
-			for(int i =1 ; i<=casillas; i++)
+			for(int i =1 ; i<=casillas_n; i++)
 				if(sensores.terreno[i]== 'M') muros++;
+				else espacios=i;
 		}
 		else 
 		{
-			for(int i=1; i<=casillas)
+			for(int i=1; i<=casillas_g ; i++)
+			{
+				int var=-0.333*pow(i,3)+4+pow(i,2)-8.667*i+6;
+				if(sensores.terreno[var]=='M') muros++;
+				else espacios=var;
+			}
+		}
+		switch(muros)
+		{
+			case 4:
+			case 3:
+				accion=actTURN_SR;
+				break;
+			case 2:
+			case 1:
+				if(espacios==1) accion=actTURN_SL;
+				else if(espacios>2) accion=actTURN_SR;
+				break;
+
 		}
 	}
+
 	else if (!girar_derecha)
 	{
 		girar_derecha=(rand()%2==0);
