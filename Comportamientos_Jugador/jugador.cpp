@@ -95,9 +95,29 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 	//Decidir la nueva acción
 	if( (sensores.terreno[2] == 'T' or sensores.terreno[2] == 'S' or 
-		 sensores.terreno[2] == 'G') and sensores.superficie[2] == '_')
+		 sensores.terreno[2] == 'G' or sensores.terreno[2] == 'K' or
+		 sensores.terreno[2] == 'D' or sensores.terreno[2] == 'X') and sensores.superficie[2] == '_')
 	{
 		accion=actFORWARD;
+	}
+	else if (sensores.terreno[0] == 'X')
+	{
+		while(sensores.bateria!=5000)
+			cout << "Batería Recargandose: " << sensores.bateria << "/5000" << endl;
+	}
+	else if (sensores.terreno[2]== 'M' or (sensores.terreno[1]== 'M' and sensores.terreno[2]== 'M'))
+	{
+		int casillas_n=3, casillas_g=;
+		int muros=0;
+		if(current_state.brujula%2 == 0)
+		{
+			for(int i =1 ; i<=casillas; i++)
+				if(sensores.terreno[i]== 'M') muros++;
+		}
+		else 
+		{
+			for(int i=1; i<=casillas)
+		}
 	}
 	else if (!girar_derecha)
 	{
