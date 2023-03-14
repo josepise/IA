@@ -119,12 +119,13 @@ Action ComportamientoJugador::think(Sensores sensores){
 		else 
 		{
 			for(int i=1; i<=casillas_g ; i++)
-			{
+			{s
 				int var=-0.333*pow(i,3)+4+pow(i,2)-8.667*i+6;
 				if(sensores.terreno[var]=='M') muros++;
 				else espacios=var;
 			}
 		}
+
 		switch(muros)
 		{
 			case 4:
