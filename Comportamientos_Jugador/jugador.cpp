@@ -101,41 +101,63 @@ Action ComportamientoJugador::think(Sensores sensores){
 	{
 		accion=actFORWARD;
 	}
-	else if (sensores.terreno[0] == 'X')
+	else if (sensores.terreno[0] == 'X' && sensores.bateria!=5000)
 	{
-		while(sensores.bateria!=5000)
+		    accion=actIDLE;
 			cout << "Batería Recargandose: " << sensores.bateria << "/5000" << endl;
 	}
 	else if (sensores.terreno[2]== 'M' or (sensores.terreno[1]== 'M' and sensores.terreno[2]== 'M'))
 	{
+		
 		int casillas_n=3, casillas_g=4;
 		int muros=0 , espacios=0;
-		if(current_state.brujula%2 == 0)
+		bool encontrado = false;
+		
+		if(current_state.brujula%2 == 0 && sensores.terreno[2]!='M')
 		{
-			for(int i =1 ; i<=casillas_n; i++)
-				if(sensores.terreno[i]== 'M') muros++;
-				else espacios=i;
-		}
-		else 
-		{
-			for(int i=1; i<=casillas_g ; i++)
-			{s
-				int var=-0.333*pow(i,3)+4+pow(i,2)-8.667*i+6;
-				if(sensores.terreno[var]=='M') muros++;
-				else espacios=var;
+			
+			for(int i =1 ; i<=casillas_n || !encontrado ; i++)
+			{
+				int var=pow(i,2)+i-1;
+				if(sensores.terreno[var]== 'M') muros++;
+				else 
+				{
+					encontrado=true;
+					espacios=i;
+				}
 			}
 		}
-
-		switch(muros)
+		else if(current_state.brujula%2 != 0)
 		{
-			case 4:
-			case 3:
-				accion=actTURN_SR;
-				break;
-			case 2:
+			
+			for(int i=1; i<=casillas_g || !encontrado ; i++)
+			{
+				int var=-0.333*pow(i,3)+4*pow(i,2)-8.667*i+6;
+				
+				if(sensores.terreno[var]=='M') muros++;
+				else 
+				{
+					encontrado=true;
+					espacios=var;
+					cout << "Sensor NA" << var << endl;
+					cout << current_state.brujula << endl;
+				}
+			}
+			
+		}
+		else
+		{
+			espacios=-1;
+		}
+
+		switch(espacios)
+		{
 			case 1:
-				if(espacios==1) accion=actTURN_SL;
-				else if(espacios>2) accion=actTURN_SR;
+			case -1:
+				accion=actTURN_SL;
+				break;
+			default:
+				accion=actFORWARD;
 				break;
 
 		}
