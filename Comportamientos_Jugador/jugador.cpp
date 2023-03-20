@@ -1,15 +1,18 @@
 #include "../Comportamientos_Jugador/jugador.hpp"
 #include <iostream>
 #include <cmath>
+#include <algorithm>
 
 using namespace std;
 
-
+vector <int> izquierda_car={9,10,11,4,5,1};
+vector <int> derecha_car={13,14,15,7,8,3};
 
 Action ComportamientoJugador::think(Sensores sensores){
 
 	Action accion = actIDLE;
 	int a;
+	bool encontrado=false;
 
 	switch (last_action)
 	{
@@ -60,20 +63,11 @@ Action ComportamientoJugador::think(Sensores sensores){
 		current_state.brujula = sensores.sentido;
 		bien_situado=true;
 	}
-	else if(current_state.brujula==norte)
-	{
-		int buff;
-		bool encontrado=false;
 
-		for(int i=0 ; i<12 && encontrado; i++)
-		{
-			if(sensores.terreno[i]=='G')
-			{
-				buff=i;
-				encontrado=true;
-			}
-		}
-	}
+	if(sensores.terreno[0]=='D')
+		power.zapa=true;
+	else if (sensores.terreno[0]=='K')
+		power.biki=true;
 
 	if(bien_situado)
 	{
@@ -97,13 +91,52 @@ Action ComportamientoJugador::think(Sensores sensores){
 	if (sensores.terreno[0] == 'X' && sensores.bateria<=4900)
 	{
 		    accion=actIDLE;
+			power.cargado=true;
 			cout << "Batería Recargandose: " << sensores.bateria << "/5000" << endl;
 	}
 	else if( (sensores.terreno[2] == 'T' or sensores.terreno[2] == 'S' or 
 		 sensores.terreno[2] == 'G' or sensores.terreno[2] == 'K' or
-		 sensores.terreno[2] == 'D' or sensores.terreno[2] == 'X') and sensores.superficie[2] == '_')
+		 sensores.terreno[2] == 'D' or sensores.terreno[2] == 'X' or
+		 (sensores.terreno[2]== 'A' && power.biki) or 
+		 (sensores.terreno[2] == 'B' && power.zapa)) and sensores.superficie[2] == '_')
 	{
+		int casilla=-1;
+
+		if(!power.biki || !power.zapa || !bien_situado || sensores.bateria <2500)
+		{
+			for(int i=1; i<16 && !encontrado; i++)
+			{
+				if((!power.zapa && sensores.terreno[i]=='D') || 
+				   (!power.biki && sensores.terreno[i]== 'K') ||
+				   (!bien_situado && sensores.terreno[i]=='G')||
+				   (sensores.terreno[i] =='X' && sensores.bateria <3000 && !power.cargado))
+				{
+					casilla=i;
+					encontrado=true;
+				}
+			}
+		}
+		
+		if(casilla!=-1 && !power.girado_zapas)
+		{
+			if(find(izquierda_car.begin(),izquierda_car.end(),casilla)!=izquierda_car.end())
+			{
+				accion=actTURN_SL;
+				power.girado_zapas=true;
+			}
+			else if(find(derecha_car.begin(),derecha_car.end(),casilla)!=derecha_car.end())
+			{
+				accion=actTURN_SR;
+				power.girado_zapas=true;
+			}
+			else
+				accion=actFORWARD;
+		}
+		else
+		{
 			accion=actFORWARD;
+			power.girado_zapas=false;
+		}	
 	}
 	else if (!girar_derecha)
 	{
@@ -277,8 +310,6 @@ void ComportamientoJugador:: PonerTerrenoEnMatriz(const vector<unsigned char> &t
 						casilla++;
 					}
 
-					
-					
 				}
 			}
 			break;

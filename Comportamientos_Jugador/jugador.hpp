@@ -9,7 +9,14 @@ struct state
   int fil;
   int col;
   Orientacion brujula;
-  
+};
+
+struct power_up
+{
+  bool zapa;
+  bool biki;
+  bool girado_zapas;
+  bool cargado;
 };
 
 class ComportamientoJugador : public Comportamiento{
@@ -21,7 +28,10 @@ class ComportamientoJugador : public Comportamiento{
       last_action=actIDLE;
       current_state.brujula=norte;
       girar_derecha=false;
-      cueva=false;
+      power.zapa=false;
+      power.biki=false;
+      power.cargado=false;
+      power.girado_zapas=false;
       bien_situado=false;
       current_state.fil=current_state.col=99;
     }
@@ -39,10 +49,9 @@ class ComportamientoJugador : public Comportamiento{
   // Declarar aquí las variables de estado
   Action last_action;
   state current_state;
-  bool cueva;
   bool girar_derecha;
   bool bien_situado;
-
+  power_up power;
 
 };
 
