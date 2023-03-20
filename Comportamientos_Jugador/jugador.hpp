@@ -21,6 +21,7 @@ class ComportamientoJugador : public Comportamiento{
       last_action=actIDLE;
       current_state.brujula=norte;
       girar_derecha=false;
+      cueva=false;
       bien_situado=false;
       current_state.fil=current_state.col=99;
     }
@@ -38,6 +39,7 @@ class ComportamientoJugador : public Comportamiento{
   // Declarar aquí las variables de estado
   Action last_action;
   state current_state;
+  bool cueva;
   bool girar_derecha;
   bool bien_situado;
 

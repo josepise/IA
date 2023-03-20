@@ -53,7 +53,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 	}
 
-	if(sensores.terreno[0]=='G' and !bien_situado)
+	if(sensores.posF!=-1 and !bien_situado)
 	{
 		current_state.fil = sensores.posF;
 		current_state.col = sensores.posC;
@@ -77,7 +77,6 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 	if(bien_situado)
 	{
-	
 		PonerTerrenoEnMatriz(sensores.terreno, current_state, mapaResultado);
 	}
 
@@ -95,74 +94,17 @@ Action ComportamientoJugador::think(Sensores sensores){
 	}
 
 	//Decidir la nueva acción
-	if( (sensores.terreno[2] == 'T' or sensores.terreno[2] == 'S' or 
-		 sensores.terreno[2] == 'G' or sensores.terreno[2] == 'K' or
-		 sensores.terreno[2] == 'D' or sensores.terreno[2] == 'X') and sensores.superficie[2] == '_')
-	{
-		accion=actFORWARD;
-	}
-	else if (sensores.terreno[0] == 'X' && sensores.bateria!=5000)
+	if (sensores.terreno[0] == 'X' && sensores.bateria<=4900)
 	{
 		    accion=actIDLE;
 			cout << "Batería Recargandose: " << sensores.bateria << "/5000" << endl;
 	}
-	else if (sensores.terreno[2]== 'M' or (sensores.terreno[1]== 'M' and sensores.terreno[2]== 'M'))
+	else if( (sensores.terreno[2] == 'T' or sensores.terreno[2] == 'S' or 
+		 sensores.terreno[2] == 'G' or sensores.terreno[2] == 'K' or
+		 sensores.terreno[2] == 'D' or sensores.terreno[2] == 'X') and sensores.superficie[2] == '_')
 	{
-		
-		int casillas_n=3, casillas_g=4;
-		int muros=0 , espacios=0;
-		bool encontrado = false;
-		
-		if(current_state.brujula%2 == 0 && sensores.terreno[2]!='M')
-		{
-			
-			for(int i =1 ; i<=casillas_n || !encontrado ; i++)
-			{
-				int var=pow(i,2)+i-1;
-				if(sensores.terreno[var]== 'M') muros++;
-				else 
-				{
-					encontrado=true;
-					espacios=i;
-				}
-			}
-		}
-		else if(current_state.brujula%2 != 0)
-		{
-			
-			for(int i=1; i<=casillas_g || !encontrado ; i++)
-			{
-				int var=-0.333*pow(i,3)+4*pow(i,2)-8.667*i+6;
-				
-				if(sensores.terreno[var]=='M') muros++;
-				else 
-				{
-					encontrado=true;
-					espacios=var;
-					cout << "Sensor NA" << var << endl;
-					cout << current_state.brujula << endl;
-				}
-			}
-			
-		}
-		else
-		{
-			espacios=-1;
-		}
-
-		switch(espacios)
-		{
-			case 1:
-			case -1:
-				accion=actTURN_SL;
-				break;
-			default:
-				accion=actFORWARD;
-				break;
-
-		}
+			accion=actFORWARD;
 	}
-
 	else if (!girar_derecha)
 	{
 		girar_derecha=(rand()%2==0);
