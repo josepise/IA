@@ -13,7 +13,13 @@ Action ComportamientoJugador::think(Sensores sensores){
 	Action accion = actIDLE;
 	int a;
 	bool encontrado=false;
-
+	
+	if(sensores.reset)
+	{	
+		power.zapa=false;
+		power.biki=false;
+		bien_situado=false;
+	}
 	switch (last_action)
 	{
 		case actFORWARD:
