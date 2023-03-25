@@ -20,6 +20,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 		power.biki=false;
 		bien_situado=false;
 	}
+	
 	switch (last_action)
 	{
 		case actFORWARD:
@@ -94,7 +95,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 	}
 
 	//Decidir la nueva acción
-	if (sensores.terreno[0] == 'X' && sensores.bateria<=4900)
+	if (sensores.terreno[0] == 'X' && sensores.bateria<=3900)
 	{
 		    accion=actIDLE;
 			power.cargado=true;
@@ -260,9 +261,7 @@ void ComportamientoJugador:: PonerTerrenoEnMatriz(const vector<unsigned char> &t
 					{
 						matriz[st.fil-d+f][st.col+d]=terreno[casilla];
 						casilla++;
-					}
-
-					
+					}	
 					
 				}
 			}
@@ -306,7 +305,7 @@ void ComportamientoJugador:: PonerTerrenoEnMatriz(const vector<unsigned char> &t
 
 					for(int c=0; c<d; c++)
 					{
-						matriz[st.fil+d][st.col+c]=terreno[casilla];
+						matriz[st.fil+c][st.col+d]=terreno[casilla];
 						casilla++;
 					}
 
@@ -347,8 +346,10 @@ void ComportamientoJugador:: PonerTerrenoEnMatriz(const vector<unsigned char> &t
 				}
 			}
 			break;
+
 		default:
 			matriz[st.fil][st.col]=terreno[0];
+			casilla++;
 			break;
 	}
 

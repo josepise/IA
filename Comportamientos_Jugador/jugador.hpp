@@ -9,6 +9,7 @@ struct state
   int fil;
   int col;
   Orientacion brujula;
+  bool muro;
 };
 
 struct power_up
@@ -27,13 +28,15 @@ class ComportamientoJugador : public Comportamiento{
       // Dar el valor inicial a las variables de estado
       last_action=actIDLE;
       current_state.brujula=norte;
+      current_state.fil=current_state.col=99;
+      current_state.muro=false;
       girar_derecha=false;
       power.zapa=false;
       power.biki=false;
       power.cargado=false;
       power.girado_zapas=false;
       bien_situado=false;
-      current_state.fil=current_state.col=99;
+      
     }
 
     ComportamientoJugador(const ComportamientoJugador & comport) : Comportamiento(comport){}
