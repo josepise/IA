@@ -13,7 +13,8 @@ Action ComportamientoJugador::think(Sensores sensores){
 	Action accion = actIDLE;
 	int a;
 	bool encontrado=false;
-	
+
+
 	if(sensores.reset)
 	{	
 		power.zapa=false;
@@ -116,7 +117,6 @@ Action ComportamientoJugador::think(Sensores sensores){
 			}
 			else if((sensores.terreno[1]=='M' || sensores.terreno[3]=='M') && sensores.superficie[2]=='_')
 			{
-				cout << "Este"<< endl;
 				accion=actFORWARD;
 			}
 			else if(sensores.terreno[1]!='M' && sensores.terreno[5]=='M')
@@ -134,7 +134,6 @@ Action ComportamientoJugador::think(Sensores sensores){
 				if(sensores.superficie[2]=='_')
 				{
 					if(sensores.terreno[7]=='M') current_state.encerrado=false;
-					cout << "este dos " << endl;
 					accion=actFORWARD;
 				}
 				else if(sensores.terreno[3]!='M')
@@ -188,10 +187,11 @@ Action ComportamientoJugador::think(Sensores sensores){
 		}
 		else
 		{
+
 			if (last_action==actFORWARD)
 			{
-				int aux=rand()%10;
-
+				int aux=rand()%8;
+				
 				if(aux!=0 && sensores.terreno[2]!='P')accion=actFORWARD;
 				else
 				{
@@ -215,6 +215,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 			{
 				accion=actFORWARD;
 			}
+			
 			power.girado_zapas=false;
 		}	
 	}
@@ -229,7 +230,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 	}
 	else
 	{
-		int aux=rand()%7;
+		int aux=rand()%10;
 		if (last_action==actFORWARD)
 		{
 
@@ -261,19 +262,30 @@ Action ComportamientoJugador::think(Sensores sensores){
 		}
 		else
 		{
-			aux=rand()%2;
-			switch (aux)
+			if(bien_situado)
 			{
+				pair<int,int> par=mirarMatriz(mapaResultado);
 
-				case 0:
-					if(sensores.terreno[1]=='P' && sensores.terreno[5]=='P')accion=actTURN_SR; 
-					else accion=actTURN_SL;
-					break;
-				case 1:
-					if(sensores.terreno[3]=='P' && sensores.terreno[7]=='P') accion=actTURN_SL; 
-					else accion=actTURN_SR;
-					break;
+				accion=accionGuiada(par,accion,sensores.terreno, sensores.superficie);			
 			}
+			else
+			{
+				aux=rand()%2;
+				
+				switch (aux)
+				{
+					case 0:
+						if(sensores.terreno[1]=='P' && sensores.terreno[5]=='P')accion=actTURN_SR; 
+						else accion=actTURN_SL;
+						break;
+					case 1:
+						if(sensores.terreno[3]=='P' && sensores.terreno[7]=='P') accion=actTURN_SL; 
+						else accion=actTURN_SR;
+						break;
+				}
+
+			} 
+
 		}
 		
 	}
@@ -477,7 +489,6 @@ bool ComportamientoJugador::hayLobos(const vector<unsigned char> &superficie)
 	for(int i=1; i<9 && !lobos; i++)
 		if(superficie[i]=='l') lobos=true;
 
-	cout <<"LOBOS:" << lobos << endl;
 	return lobos;
 }
 
@@ -489,4 +500,154 @@ bool ComportamientoJugador::hayAldeanos(const vector <unsigned char> &superficie
 		if(superficie[i]=='l') aldeano=true;
 
 	return aldeano;
+}
+
+pair<int,int> ComportamientoJugador::mirarMatriz(const vector<vector<unsigned char>> &terreno)
+{
+	vector<vector<unsigned char>>::const_iterator inicio=terreno.begin();
+	vector<vector<unsigned char>>::const_iterator mitad=terreno.begin()+current_state.fil;
+
+	pair<int,int> cuenta;
+
+	cuenta.first=0;
+	cuenta.second=0;
+
+	for(inicio; inicio!=mitad; ++inicio)
+	{
+		for(vector<unsigned char>::const_iterator i=(*inicio).begin(); i!=(*inicio).end();++i)
+			if(*i=='?')cuenta.first++;
+	}
+	for(mitad+1;mitad!=terreno.end(); ++mitad)
+	{
+		for(vector<unsigned char>::const_iterator i=(*mitad).begin(); i!=(*mitad).end();++i)
+			if(*i=='?')cuenta.second++;
+	}
+
+	cout << "Cuenta" << cuenta.first << ":" << cuenta.second << endl;
+
+	return cuenta;
+}
+
+Action ComportamientoJugador::accionGuiada(pair<int,int> par, Action accion, const vector<unsigned char> &terreno, const vector<unsigned char> &superficie)
+{
+	Action accion_g;
+	if(par.first<par.second) 
+	{
+		current_state.sur=true;
+		current_state.norte=false;
+	}
+	else 
+	{
+		current_state.norte=true;
+		current_state.sur=false;
+	}
+
+	if(current_state.norte && current_state.brujula==(Orientacion::sureste||Orientacion::suroeste||Orientacion::sur) && !power.girado_zapas)
+	{
+		cout << "Aqui NORTE" << endl;
+		switch (current_state.brujula)
+		{
+		
+			case Orientacion::sureste:
+				if((terreno[2]=='P' && terreno[5]=='P')) accion_g=actTURN_SL;
+				else 
+				{
+					if(rand()%2==0)accion_g=actTURN_SR;
+					else accion_g=actTURN_BR;
+				}
+				break;
+			case Orientacion::suroeste:
+				if((terreno[2]=='P' && terreno[5]=='P')) accion_g=actTURN_SR;
+				else 
+				{
+					if(rand()%2==0)accion_g=actTURN_SL;
+					else accion_g=actTURN_BL;
+				}
+				break;
+			case Orientacion::sur:
+				if((terreno[1]=='P' && terreno[5]=='P')) accion_g=actTURN_SR;
+				else 
+				{
+					if(rand()%2==0)accion_g=actTURN_BL;
+					else accion_g=actTURN_BR;
+				}			
+		}
+		power.girado_zapas=true;
+		power.contador=0;
+	}
+	else if( current_state.sur && current_state.brujula==(Orientacion::noreste||Orientacion::noroeste||Orientacion::norte) && !power.girado_zapas)
+	{
+		cout << "AQUI SUR" << endl;
+		switch (current_state.brujula)
+		{
+		
+			case Orientacion::noreste:
+				if((terreno[2]=='P' && terreno[5]=='P')) accion_g=actTURN_SL;
+				else 
+				{
+					if(rand()%2==0)accion_g=actTURN_SR;
+					else accion_g=actTURN_BR;
+				}
+				break;
+			case Orientacion::noroeste:
+				if((terreno[2]=='P' && terreno[5]=='P')) accion_g=actTURN_SR;
+				else 
+				{
+					if(rand()%2==0)accion_g=actTURN_SL;
+					else accion_g=actTURN_BL;
+				}
+				break;
+			case Orientacion::norte:
+				if((terreno[1]=='P' && terreno[5]=='P')) accion_g=actTURN_SR;
+				else 
+				{
+					if(rand()%2==0)accion_g=actTURN_BL;
+					else accion_g=actTURN_BR;
+				}			
+		}
+		power.girado_zapas=true;
+		power.contador=0;
+	}
+	else
+	{
+		int aux=rand()%10;
+
+		if(aux!=0 && (terreno[2] == 'T' or terreno[2] == 'S' or 
+					terreno[2] == 'G' or terreno[2] == 'K' or
+					terreno[2] == 'D' or terreno[2] == 'X' or
+					(terreno[2]== 'A' && power.biki) or 
+					(terreno[2] == 'B' && power.zapa)) and superficie[2]=='_')
+		{
+			accion_g=actFORWARD;
+		}
+		else
+		{ 	
+			aux=rand()%2;
+			switch (aux)
+			{
+
+				case 0:
+					if(terreno[1]=='P' && terreno[5]=='P')accion_g=actTURN_SR; 
+					else accion_g=actTURN_SL;
+					break;
+				case 1:
+					if(terreno[3]=='P' && terreno[7]=='P') accion_g=actTURN_SL; 
+					else accion_g=actTURN_SR;
+					break;
+			}
+		}
+
+		power.contador++;
+
+		if(power.contador==8)
+			power.girado_zapas=false;
+		
+	
+	}
+
+	current_state.norte=false;
+	current_state.sur=false;
+	cout << "Accion :" << accion_g << endl;
+	return accion_g;
+
 }

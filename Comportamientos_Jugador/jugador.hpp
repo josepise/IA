@@ -10,6 +10,8 @@ struct state
   int col;
   Orientacion brujula;
   bool encerrado;
+  bool norte;
+  bool sur;
 };
 
 struct power_up
@@ -17,6 +19,7 @@ struct power_up
   bool zapa;
   bool biki;
   bool girado_zapas;
+  int contador;
   bool cargado;
 };
 
@@ -33,10 +36,12 @@ class ComportamientoJugador : public Comportamiento{
       girar=false;
       power.zapa=false;
       power.biki=false;
+      power.contador=0;
       power.cargado=false;
       power.girado_zapas=false;
       bien_situado=false;
-      
+      current_state.norte=false;
+      current_state.sur=false;
     }
 
     ComportamientoJugador(const ComportamientoJugador & comport) : Comportamiento(comport){}
@@ -48,6 +53,8 @@ class ComportamientoJugador : public Comportamiento{
 						  vector < vector< unsigned char >> & matriz);
     bool hayLobos(const vector<unsigned char> &superficie);
     bool hayAldeanos(const vector <unsigned char> &superficie);
+    pair<int,int> mirarMatriz(const vector<vector<unsigned char>> &terreno);
+    Action accionGuiada(pair<int,int> par, Action accion,const vector<unsigned char> &terreno, const vector<unsigned char> &superficie);
 
   private:
   
