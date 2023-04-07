@@ -9,7 +9,7 @@ struct state
   int fil;
   int col;
   Orientacion brujula;
-  bool muro;
+  bool encerrado;
 };
 
 struct power_up
@@ -29,8 +29,8 @@ class ComportamientoJugador : public Comportamiento{
       last_action=actIDLE;
       current_state.brujula=norte;
       current_state.fil=current_state.col=99;
-      current_state.muro=false;
-      girar_derecha=false;
+      current_state.encerrado=false;
+      girar=false;
       power.zapa=false;
       power.biki=false;
       power.cargado=false;
@@ -46,13 +46,15 @@ class ComportamientoJugador : public Comportamiento{
     int interact(Action accion, int valor);
     void PonerTerrenoEnMatriz(const vector<unsigned char> &terreno, const state &st,
 						  vector < vector< unsigned char >> & matriz);
+    bool hayLobos(const vector<unsigned char> &superficie);
+    bool hayAldeanos(const vector <unsigned char> &superficie);
 
   private:
   
   // Declarar aquí las variables de estado
   Action last_action;
   state current_state;
-  bool girar_derecha;
+  bool girar;
   bool bien_situado;
   power_up power;
 

@@ -101,11 +101,58 @@ Action ComportamientoJugador::think(Sensores sensores){
 			power.cargado=true;
 			cout << "Batería Recargandose: " << sensores.bateria << "/5000" << endl;
 	}
+	else if((sensores.terreno[2]=='M' && sensores.terreno[1]=='M' && sensores.terreno[3]=='M') || current_state.encerrado)
+	{
+		if(!current_state.encerrado)
+		{
+			current_state.encerrado=true;
+			accion=actTURN_SR;
+		}
+		else
+		{
+			if( sensores.terreno[2]== 'M')
+			{
+				accion=actTURN_SR;
+			}
+			else if((sensores.terreno[1]=='M' || sensores.terreno[3]=='M') && sensores.superficie[2]=='_')
+			{
+				cout << "Este"<< endl;
+				accion=actFORWARD;
+			}
+			else if(sensores.terreno[1]!='M' && sensores.terreno[5]=='M')
+			{
+				accion=actTURN_SL;
+				current_state.encerrado=false;
+			}
+			else if(sensores.terreno[3]!='M' && sensores.terreno[7=='M'])
+			{
+				accion=actTURN_SR;
+				current_state.encerrado=false;
+			}
+			else 
+			{
+				if(sensores.superficie[2]=='_')
+				{
+					if(sensores.terreno[7]=='M') current_state.encerrado=false;
+					cout << "este dos " << endl;
+					accion=actFORWARD;
+				}
+				else if(sensores.terreno[3]!='M')
+				{
+					accion=actTURN_SR;
+				}
+				else
+					accion=actTURN_SL;
+
+			}
+
+		}
+	}
 	else if( (sensores.terreno[2] == 'T' or sensores.terreno[2] == 'S' or 
 		 sensores.terreno[2] == 'G' or sensores.terreno[2] == 'K' or
 		 sensores.terreno[2] == 'D' or sensores.terreno[2] == 'X' or
 		 (sensores.terreno[2]== 'A' && power.biki) or 
-		 (sensores.terreno[2] == 'B' && power.zapa)) and sensores.superficie[2] == '_')
+		 (sensores.terreno[2] == 'B' && power.zapa)) and sensores.superficie[2]=='_' and !hayLobos(sensores.superficie))
 	{
 		int casilla=-1;
 
@@ -141,26 +188,94 @@ Action ComportamientoJugador::think(Sensores sensores){
 		}
 		else
 		{
-			accion=actFORWARD;
+			if (last_action==actFORWARD)
+			{
+				int aux=rand()%10;
+
+				if(aux!=0 && sensores.terreno[2]!='P')accion=actFORWARD;
+				else
+				{
+					aux=rand()%2;
+					switch (aux)
+					{
+		
+						case 0:
+							if(sensores.terreno[1]=='P' && sensores.terreno[5]=='P')accion=actTURN_SR; 
+							else accion=actTURN_SL;
+							break;
+						case 1:
+							if(sensores.terreno[3]=='P' && sensores.terreno[7]=='P') accion=actTURN_SL; 
+							else accion=actTURN_SR;
+							break;
+					}
+				}
+
+			}
+			else
+			{
+				accion=actFORWARD;
+			}
 			power.girado_zapas=false;
 		}	
 	}
-	else if (!girar_derecha)
+	else if (hayLobos(sensores.superficie))
 	{
-		girar_derecha=(rand()%2==0);
-		if(!girar_derecha)
-			accion=actTURN_SL;
+		girar=(rand()%2==0);
+		if(!girar)
+			accion=actTURN_BR;
 		else 
 			accion=actTURN_BL;
+		
 	}
 	else
 	{
-		girar_derecha=(rand()%2==0);
+		int aux=rand()%7;
+		if (last_action==actFORWARD)
+		{
 
-		if(!girar_derecha)
-			accion=actTURN_SR;
-		else 
-			accion=actTURN_BR;
+			if(aux!=0 && (sensores.terreno[2] == 'T' or sensores.terreno[2] == 'S' or 
+		 				  sensores.terreno[2] == 'G' or sensores.terreno[2] == 'K' or
+		 				  sensores.terreno[2] == 'D' or sensores.terreno[2] == 'X' or
+		 				  (sensores.terreno[2]== 'A' && power.biki) or 
+		 				  (sensores.terreno[2] == 'B' && power.zapa)) and sensores.superficie[2]=='_')
+			{
+				accion=actFORWARD;
+			}
+			else
+			{ 	
+				aux=rand()%2;
+				switch (aux)
+				{
+	
+					case 0:
+						if(sensores.terreno[1]=='P' && sensores.terreno[5]=='P')accion=actTURN_SR; 
+						else accion=actTURN_SL;
+						break;
+					case 1:
+						if(sensores.terreno[3]=='P' && sensores.terreno[7]=='P') accion=actTURN_SL; 
+						else accion=actTURN_SR;
+						break;
+				}
+			}
+			
+		}
+		else
+		{
+			aux=rand()%2;
+			switch (aux)
+			{
+
+				case 0:
+					if(sensores.terreno[1]=='P' && sensores.terreno[5]=='P')accion=actTURN_SR; 
+					else accion=actTURN_SL;
+					break;
+				case 1:
+					if(sensores.terreno[3]=='P' && sensores.terreno[7]=='P') accion=actTURN_SL; 
+					else accion=actTURN_SR;
+					break;
+			}
+		}
+		
 	}
 
 	cout << "Terreno: ";
@@ -353,4 +468,25 @@ void ComportamientoJugador:: PonerTerrenoEnMatriz(const vector<unsigned char> &t
 			break;
 	}
 
+}
+
+bool ComportamientoJugador::hayLobos(const vector<unsigned char> &superficie)
+{
+	bool lobos=false;
+
+	for(int i=1; i<9 && !lobos; i++)
+		if(superficie[i]=='l') lobos=true;
+
+	cout <<"LOBOS:" << lobos << endl;
+	return lobos;
+}
+
+bool ComportamientoJugador::hayAldeanos(const vector <unsigned char> &superficie)
+{
+	bool aldeano=false;
+
+	for(int i=1; i<9 && !aldeano; i++)
+		if(superficie[i]=='l') aldeano=true;
+
+	return aldeano;
 }
