@@ -2,16 +2,6 @@
 
 LEADERBOARD_URL="http://mcs.ugr.es/p1"
 
-# Check last update
-last_update=$(git ls-remote https://github.com/ugr-ccia-IA/practica1.git HEAD | awk '{print $1}')
-if git merge-base --is-ancestor $last_update main; then
-    echo "Repositorio actualizado"
-else
-    echo "Actualiza el repositorio con los cambios del profesor antes de ejecutar el leaderboard"
-    exit 1
-fi
-# Save commits list
-COMMITS_LIST=$(git log --format="%H")
 
 # if 1st argument is "clean", remove .leaderboard_config
 if [ "$1" = "clean" ]; then
