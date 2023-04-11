@@ -14,6 +14,9 @@ Action ComportamientoJugador::think(Sensores sensores){
 	int a;
 	bool encontrado=false;
 
+	
+	if(sensores.terreno[0]==('T'||'S'||'D'||'K'||'X'))
+		current_state.comienzo=false;
 
 	if(sensores.reset)
 	{	
@@ -102,7 +105,8 @@ Action ComportamientoJugador::think(Sensores sensores){
 			power.cargado=true;
 			cout << "Batería Recargandose: " << sensores.bateria << "/5000" << endl;
 	}
-	else if((sensores.terreno[2]=='M' && sensores.terreno[1]=='M' && sensores.terreno[3]=='M') || current_state.encerrado)
+	else if((sensores.terreno[2]=='M' && sensores.terreno[1]=='M' && sensores.terreno[3]=='M')||
+			(sensores.terreno[2]=='P' && sensores.terreno[1]=='P' && sensores.terreno[3]=='P')|| current_state.encerrado)
 	{
 		if(!current_state.encerrado)
 		{
@@ -111,20 +115,32 @@ Action ComportamientoJugador::think(Sensores sensores){
 		}
 		else
 		{
-			if( sensores.terreno[2]== 'M')
-			{
-				accion=actTURN_SR;
+			if(sensores.terreno[2]== 'M'||sensores.terreno[2]== 'P')
+			{	
+				if(last_action==actTURN_SR)
+					accion=actTURN_SR;
+				else if(last_action==actTURN_SL)
+					accion=actTURN_SL;
+				else
+				{
+					if(rand()%2==0)
+						accion=actTURN_SR;
+					else
+						accion=actTURN_SL;
+				}
 			}
-			else if((sensores.terreno[1]=='M' || sensores.terreno[3]=='M') && sensores.superficie[2]=='_')
+			else if(((sensores.terreno[1]=='M' || sensores.terreno[3]=='M') || (sensores.terreno[1]=='P' || sensores.terreno[3]=='P'))
+					 && sensores.superficie[2]=='_')
 			{
-				accion=actFORWARD;
+				if(puedoAndar(sensores.terreno,sensores.superficie))
+						accion=actFORWARD;
 			}
-			else if(sensores.terreno[1]!='M' && sensores.terreno[5]=='M')
+			else if((sensores.terreno[1]!='M' && sensores.terreno[5]=='M')  ||(sensores.terreno[1]!='P' && sensores.terreno[5]=='P') )
 			{
 				accion=actTURN_SL;
 				current_state.encerrado=false;
 			}
-			else if(sensores.terreno[3]!='M' && sensores.terreno[7=='M'])
+			else if((sensores.terreno[3]!='M' && sensores.terreno[7]=='M')  || ( sensores.terreno[3]!='P' && sensores.terreno[5]=='P'))
 			{
 				accion=actTURN_SR;
 				current_state.encerrado=false;
@@ -134,7 +150,13 @@ Action ComportamientoJugador::think(Sensores sensores){
 				if(sensores.superficie[2]=='_')
 				{
 					if(sensores.terreno[7]=='M') current_state.encerrado=false;
-					accion=actFORWARD;
+					
+					if( (sensores.terreno[2] == 'T' or sensores.terreno[2] == 'S' or 
+						sensores.terreno[2] == 'G' or sensores.terreno[2] == 'K' or
+						sensores.terreno[2] == 'D' or sensores.terreno[2] == 'X' or
+						(sensores.terreno[2]== 'A' && power.biki) or 
+						(sensores.terreno[2] == 'B' && power.zapa)))
+						accion=actFORWARD;
 				}
 				else if(sensores.terreno[3]!='M')
 				{
@@ -142,16 +164,23 @@ Action ComportamientoJugador::think(Sensores sensores){
 				}
 				else
 					accion=actTURN_SL;
-
+				
 			}
 
+		}
+
+		if(current_state.contador_encerrado!=20) current_state.contador_encerrado++;
+		else 
+		{
+			current_state.contador_encerrado=0; 
+			current_state.encerrado=false;
 		}
 	}
 	else if( (sensores.terreno[2] == 'T' or sensores.terreno[2] == 'S' or 
 		 sensores.terreno[2] == 'G' or sensores.terreno[2] == 'K' or
 		 sensores.terreno[2] == 'D' or sensores.terreno[2] == 'X' or
-		 (sensores.terreno[2]== 'A' && power.biki) or 
-		 (sensores.terreno[2] == 'B' && power.zapa)) and sensores.superficie[2]=='_' and !hayLobos(sensores.superficie))
+		 (sensores.terreno[2]== 'A' and power.biki) or 
+		 (sensores.terreno[2] == 'B' and power.zapa) ) and sensores.superficie[2]=='_' and !hayLobos(sensores.superficie))
 	{
 		int casilla=-1;
 
@@ -193,27 +222,12 @@ Action ComportamientoJugador::think(Sensores sensores){
 				int aux=rand()%8;
 				
 				if(aux!=0 && sensores.terreno[2]!='P')accion=actFORWARD;
-				else
-				{
-					aux=rand()%2;
-					switch (aux)
-					{
-		
-						case 0:
-							if(sensores.terreno[1]=='P' && sensores.terreno[5]=='P')accion=actTURN_SR; 
-							else accion=actTURN_SL;
-							break;
-						case 1:
-							if(sensores.terreno[3]=='P' && sensores.terreno[7]=='P') accion=actTURN_SL; 
-							else accion=actTURN_SR;
-							break;
-					}
-				}
-
+				else accion=accionAleatoria(sensores.terreno,sensores.superficie);
+				
 			}
 			else
 			{
-				accion=actFORWARD;
+				accion=accionAleatoria(sensores.terreno, sensores.superficie);
 			}
 			
 			power.girado_zapas=false;
@@ -234,59 +248,15 @@ Action ComportamientoJugador::think(Sensores sensores){
 		if (last_action==actFORWARD)
 		{
 
-			if(aux!=0 && (sensores.terreno[2] == 'T' or sensores.terreno[2] == 'S' or 
-		 				  sensores.terreno[2] == 'G' or sensores.terreno[2] == 'K' or
-		 				  sensores.terreno[2] == 'D' or sensores.terreno[2] == 'X' or
-		 				  (sensores.terreno[2]== 'A' && power.biki) or 
-		 				  (sensores.terreno[2] == 'B' && power.zapa)) and sensores.superficie[2]=='_')
+			if(aux!=0 && puedoAndar(sensores.terreno,sensores.superficie))
 			{
 				accion=actFORWARD;
 			}
-			else
-			{ 	
-				aux=rand()%2;
-				switch (aux)
-				{
-	
-					case 0:
-						if(sensores.terreno[1]=='P' && sensores.terreno[5]=='P')accion=actTURN_SR; 
-						else accion=actTURN_SL;
-						break;
-					case 1:
-						if(sensores.terreno[3]=='P' && sensores.terreno[7]=='P') accion=actTURN_SL; 
-						else accion=actTURN_SR;
-						break;
-				}
-			}
+			else accion=accionAleatoria(sensores.terreno, sensores.superficie);
 			
 		}
-		else
-		{
-			if(bien_situado)
-			{
-				pair<int,int> par=mirarMatriz(mapaResultado);
-
-				accion=accionGuiada(par,accion,sensores.terreno, sensores.superficie);			
-			}
-			else
-			{
-				aux=rand()%2;
-				
-				switch (aux)
-				{
-					case 0:
-						if(sensores.terreno[1]=='P' && sensores.terreno[5]=='P')accion=actTURN_SR; 
-						else accion=actTURN_SL;
-						break;
-					case 1:
-						if(sensores.terreno[3]=='P' && sensores.terreno[7]=='P') accion=actTURN_SL; 
-						else accion=actTURN_SR;
-						break;
-				}
-
-			} 
-
-		}
+		else accion=accionAleatoria(sensores.terreno, sensores.superficie);
+		
 		
 	}
 
@@ -650,4 +620,42 @@ Action ComportamientoJugador::accionGuiada(pair<int,int> par, Action accion, con
 	cout << "Accion :" << accion_g << endl;
 	return accion_g;
 
+}
+
+Action ComportamientoJugador:: accionAleatoria(const vector<unsigned char> &terreno, const vector <unsigned char> &superficie)
+{
+	Action accion;
+	int aux=rand()%8;
+	cout << "ACCION ALEATORIA" << endl;
+	switch (aux)
+	{
+
+		case 0:
+			if(!puedoAndar(terreno,superficie)) accion=actTURN_BR;
+			else if( (terreno[1]=='P' && terreno[5]=='P') ||
+				(!power.biki && terreno[1]=='A' && terreno[5]=='A') ||
+				(!power.zapa && terreno[1]=='B' && terreno[5]=='B')) accion=actTURN_SR; 
+			else accion=actTURN_SL;
+			break;
+		case 1:
+			if(!puedoAndar(terreno,superficie)) accion=actTURN_BL;
+			else if( (terreno[3]=='P' && terreno[7]=='P')||
+				(!power.biki && terreno[3]=='A' && terreno[7]=='A') ||
+				(!power.zapa && terreno[3]=='B' && terreno[7]=='B')) accion=actTURN_SL; 
+			else accion=actTURN_SR;
+			break;
+
+		default:
+			if(puedoAndar(terreno,superficie)) accion=actFORWARD;
+			break;
+	}
+	
+	return accion;
+}
+
+bool ComportamientoJugador:: puedoAndar(const vector<unsigned char> &terreno, const vector <unsigned char> &superficie)
+{
+	return  ((terreno[2] == 'T' or terreno[2] == 'S' or terreno[2] == 'G' or terreno[2] == 'K' or
+		 		 terreno[2] == 'D' or terreno[2] == 'X' or (terreno[2]== 'A' and power.biki) or 
+		 		(terreno[2] == 'B' and power.zapa) ) and superficie[2]=='_' and !hayLobos(superficie));
 }
