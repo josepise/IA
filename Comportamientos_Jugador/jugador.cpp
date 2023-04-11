@@ -221,7 +221,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 			{
 				int aux=rand()%8;
 				
-				if(aux!=0 && sensores.terreno[2]!='P')accion=actFORWARD;
+				if(aux!=0 && puedoAndar(sensores.terreno,sensores.superficie))accion=actFORWARD;
 				else accion=accionAleatoria(sensores.terreno,sensores.superficie);
 				
 			}
@@ -243,8 +243,8 @@ Action ComportamientoJugador::think(Sensores sensores){
 		
 	}
 	else
-	{/*
-		int aux=rand()%10;
+	{
+		int aux=rand()%8;
 		if (last_action==actFORWARD)
 		{
 
@@ -255,7 +255,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 			else accion=accionAleatoria(sensores.terreno, sensores.superficie);
 			
 		}
-		else */accion=accionAleatoria(sensores.terreno, sensores.superficie);
+		else accion=accionAleatoria(sensores.terreno, sensores.superficie);
 		
 		
 	}
