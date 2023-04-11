@@ -243,7 +243,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 		
 	}
 	else
-	{
+	{/*
 		int aux=rand()%10;
 		if (last_action==actFORWARD)
 		{
@@ -255,7 +255,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 			else accion=accionAleatoria(sensores.terreno, sensores.superficie);
 			
 		}
-		else accion=accionAleatoria(sensores.terreno, sensores.superficie);
+		else */accion=accionAleatoria(sensores.terreno, sensores.superficie);
 		
 		
 	}
