@@ -14,6 +14,7 @@ struct state
   bool norte;
   bool sur;
   bool comienzo;
+  int tamano;
 };
 
 struct power_up
@@ -40,6 +41,7 @@ class ComportamientoJugador : public Comportamiento{
       power.biki=false;
       current_state.comienzo=true;
       current_state.contador_encerrado=0;
+      current_state.tamano=size;
       power.contador=0;
       power.cargado=false;
       power.girado_zapas=false;

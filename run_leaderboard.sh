@@ -29,7 +29,7 @@ echo "Instalando dependencias..."
 python3 -c 'import sys; assert sys.version_info[:][1] >= 8' || (echo "Instalando python3.8..." && sudo apt install software-properties-common && sudo add-apt-repository ppa:deadsnakes/ppa && sudo apt install python3.8 && sudo ln -s /usr/bin/python3.8 /usr/bin/python3) || exit 1
 
 echo "Eliminando archivos de compilación..."
-rm -r build CMakeCache.txt CMakeFiles cmake_install.cmake Makefile practica1 practica1SG 2> /dev/null
+rm -r build CMakeCache.txt CMakeFiles cmake_install.cmake practica1 practica1SG 2> /dev/null
 
 echo "Compilando proyecto..."
 mkdir build

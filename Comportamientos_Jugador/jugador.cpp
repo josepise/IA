@@ -14,9 +14,11 @@ Action ComportamientoJugador::think(Sensores sensores){
 	int a;
 	bool encontrado=false;
 
-	
-	if(sensores.terreno[0]==('T'||'S'||'D'||'K'||'X'))
-		current_state.comienzo=false;
+	if(sensores.terreno[0] == 'T' || sensores.terreno[0] == 'S' or sensores.terreno[0] == 'G' || sensores.terreno[0] == 'K' ||
+	   sensores.terreno[0] == 'D' || sensores.terreno[0] == 'X')
+	{
+		current_state.comienzo=false;	
+	}
 
 	if(sensores.reset)
 	{	
@@ -99,15 +101,20 @@ Action ComportamientoJugador::think(Sensores sensores){
 	}
 
 	//Decidir la nueva acción
+
+	//Si se encuentra el robot encima de una estación de carga y tiene menos de 3900 de batería.
 	if (sensores.terreno[0] == 'X' && sensores.bateria<=3900)
 	{
 		    accion=actIDLE;
 			power.cargado=true;
 			cout << "Batería Recargandose: " << sensores.bateria << "/5000" << endl;
 	}
+	//Si detecta que se encuentra "encerrado"
 	else if((sensores.terreno[2]=='M' && sensores.terreno[1]=='M' && sensores.terreno[3]=='M')||
 			(sensores.terreno[2]=='P' && sensores.terreno[1]=='P' && sensores.terreno[3]=='P')|| current_state.encerrado)
 	{
+
+		//Mantengo al robot en estado encerrado aunque no este frente un muro o precipicio
 		if(!current_state.encerrado)
 		{
 			current_state.encerrado=true;
@@ -169,18 +176,14 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 		}
 
-		if(current_state.contador_encerrado!=20) current_state.contador_encerrado++;
+		if(current_state.contador_encerrado<(current_state.tamano*0.15) && current_state.encerrado) current_state.contador_encerrado++;
 		else 
 		{
 			current_state.contador_encerrado=0; 
 			current_state.encerrado=false;
 		}
 	}
-	else if( (sensores.terreno[2] == 'T' or sensores.terreno[2] == 'S' or 
-		 sensores.terreno[2] == 'G' or sensores.terreno[2] == 'K' or
-		 sensores.terreno[2] == 'D' or sensores.terreno[2] == 'X' or
-		 (sensores.terreno[2]== 'A' and power.biki) or 
-		 (sensores.terreno[2] == 'B' and power.zapa) ) and sensores.superficie[2]=='_' and !hayLobos(sensores.superficie))
+	else if( puedoAndar(sensores.terreno,sensores.superficie))
 	{
 		int casilla=-1;
 
@@ -216,7 +219,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 		}
 		else
 		{
-
+			
 			if (last_action==actFORWARD)
 			{
 				int aux=rand()%8;
@@ -456,7 +459,7 @@ bool ComportamientoJugador::hayLobos(const vector<unsigned char> &superficie)
 {
 	bool lobos=false;
 
-	for(int i=1; i<9 && !lobos; i++)
+	for(int i=1; i<16 && !lobos; i++)
 		if(superficie[i]=='l') lobos=true;
 
 	return lobos;
@@ -626,7 +629,6 @@ Action ComportamientoJugador:: accionAleatoria(const vector<unsigned char> &terr
 {
 	Action accion;
 	int aux=rand()%8;
-	cout << "ACCION ALEATORIA" << endl;
 	switch (aux)
 	{
 
@@ -647,6 +649,7 @@ Action ComportamientoJugador:: accionAleatoria(const vector<unsigned char> &terr
 
 		default:
 			if(puedoAndar(terreno,superficie)) accion=actFORWARD;
+			else accion=accionAleatoria(terreno,superficie);
 			break;
 	}
 	
@@ -655,7 +658,7 @@ Action ComportamientoJugador:: accionAleatoria(const vector<unsigned char> &terr
 
 bool ComportamientoJugador:: puedoAndar(const vector<unsigned char> &terreno, const vector <unsigned char> &superficie)
 {
-	return  ((terreno[2] == 'T' or terreno[2] == 'S' or terreno[2] == 'G' or terreno[2] == 'K' or
+	return  (((terreno[2] == 'T' or terreno[2] == 'S' or terreno[2] == 'G' or terreno[2] == 'K' or
 		 		 terreno[2] == 'D' or terreno[2] == 'X' or (terreno[2]== 'A' and power.biki) or 
-		 		(terreno[2] == 'B' and power.zapa) ) and superficie[2]=='_' and !hayLobos(superficie));
+		 		(terreno[2] == 'B' and power.zapa) ) and superficie[2]=='_' and !hayLobos(superficie)) || current_state.comienzo);
 }
