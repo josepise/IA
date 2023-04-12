@@ -14,6 +14,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 	int a;
 	bool encontrado=false;
 
+	//Con este if evitamos que el robot se quede en el inicio 
 	if(sensores.terreno[0] == 'T' || sensores.terreno[0] == 'S' or sensores.terreno[0] == 'G' || sensores.terreno[0] == 'K' ||
 	   sensores.terreno[0] == 'D' || sensores.terreno[0] == 'X')
 	{
@@ -102,14 +103,14 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 	//Decidir la nueva acción
 
-	//Si se encuentra el robot encima de una estación de carga y tiene menos de 3900 de batería.
-	if (sensores.terreno[0] == 'X' && sensores.bateria<=3900)
+	//Si se encuentra el robot encima de una estación de carga y tiene menos de 3900 de batería paramos a cargar.
+	if (sensores.terreno[0] == 'X' && sensores.bateria<=3900 )
 	{
 		    accion=actIDLE;
 			power.cargado=true;
 			cout << "Batería Recargandose: " << sensores.bateria << "/5000" << endl;
 	}
-	//Si detecta que se encuentra "encerrado"
+	//Si detecta que se encuentra "encerrado" ya sea por muro o precipipio
 	else if((sensores.terreno[2]=='M' && sensores.terreno[1]=='M' && sensores.terreno[3]=='M')||
 			(sensores.terreno[2]=='P' && sensores.terreno[1]=='P' && sensores.terreno[3]=='P')|| current_state.encerrado)
 	{
@@ -122,6 +123,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 		}
 		else
 		{
+			//En este apartado intento englobar todas las posibles situaciones estando encerrado
 			if(sensores.terreno[2]== 'M'||sensores.terreno[2]== 'P')
 			{	
 				if(last_action==actTURN_SR)
@@ -158,7 +160,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 				{
 					if(sensores.terreno[7]=='M') current_state.encerrado=false;
 					
-					if( (sensores.terreno[2] == 'T' or sensores.terreno[2] == 'S' or 
+					if((sensores.terreno[2] == 'T' or sensores.terreno[2] == 'S' or 
 						sensores.terreno[2] == 'G' or sensores.terreno[2] == 'K' or
 						sensores.terreno[2] == 'D' or sensores.terreno[2] == 'X' or
 						(sensores.terreno[2]== 'A' && power.biki) or 
@@ -176,6 +178,9 @@ Action ComportamientoJugador::think(Sensores sensores){
 
 		}
 
+		//Dado que el método de considerar estar encerrado para el robot puede darse fuera de una habitación, establecemos un umbral
+		// por el cual considera despues de superar el 15% del tamaño del mapa con sucesiones de varias acciones pasará a no "pensar"
+		// que seta encerrado
 		if(current_state.contador_encerrado<(current_state.tamano*0.15) && current_state.encerrado) current_state.contador_encerrado++;
 		else 
 		{
@@ -183,10 +188,13 @@ Action ComportamientoJugador::think(Sensores sensores){
 			current_state.encerrado=false;
 		}
 	}
+	//Vemos si se puede avanzar 
 	else if( puedoAndar(sensores.terreno,sensores.superficie))
 	{
 		int casilla=-1;
 
+		//En el caso de no tener los objetos o no estar suficientemente cargado buscamos las casillas 
+		//en el rango de vision.
 		if(!power.biki || !power.zapa || !bien_situado || sensores.bateria <2500)
 		{
 			for(int i=1; i<16 && !encontrado; i++)
@@ -202,8 +210,11 @@ Action ComportamientoJugador::think(Sensores sensores){
 			}
 		}
 		
+		//Si he encontrado una casilla con el objeto nos vamos a dirijir hacia ella. Para
+		// evitar estar girando de un lado a otro sin avanzar 
 		if(casilla!=-1 && !power.girado_zapas)
 		{
+			//Esta 
 			if(find(izquierda_car.begin(),izquierda_car.end(),casilla)!=izquierda_car.end())
 			{
 				accion=actTURN_SL;
@@ -236,6 +247,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 			power.girado_zapas=false;
 		}	
 	}
+	//Miramos si hay lobos en el rango de vision
 	else if (hayLobos(sensores.superficie))
 	{
 		girar=(rand()%2==0);
@@ -262,7 +274,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 		
 		
 	}
-
+/*
 	cout << "Terreno: ";
 
 	for (int i=0; i<sensores.terreno.size(); i++)
@@ -278,6 +290,7 @@ Action ComportamientoJugador::think(Sensores sensores){
 	cout << "Reset: " << sensores.reset << endl;
 	cout << "Vida: " << sensores.vida << endl;
 	cout << endl;
+	*/
 
 
 	// Determinar el efecto de la ultima accion enviada
@@ -475,6 +488,54 @@ bool ComportamientoJugador::hayAldeanos(const vector <unsigned char> &superficie
 	return aldeano;
 }
 
+Action ComportamientoJugador:: accionAleatoria(const vector<unsigned char> &terreno, 
+											   const vector <unsigned char> &superficie)
+{
+	Action accion;
+	
+	//Calcula un número aleatorio entre el 0 y el 7
+	int aux=rand()%8;
+	
+	switch (aux)
+	{
+
+		case 0:
+			if(!puedoAndar(terreno,superficie)) accion=actTURN_BR;
+			else if( (terreno[1]=='P' && terreno[5]=='P') ||
+				(!power.biki && terreno[1]=='A' && terreno[5]=='A') ||
+				(!power.zapa && terreno[1]=='B' && terreno[5]=='B')) accion=actTURN_SR; 
+			else accion=actTURN_SL;
+			break;
+		case 1:
+			if(!puedoAndar(terreno,superficie)) accion=actTURN_BL;
+			else if( (terreno[3]=='P' && terreno[7]=='P')||
+				(!power.biki && terreno[3]=='A' && terreno[7]=='A') ||
+				(!power.zapa && terreno[3]=='B' && terreno[7]=='B')) accion=actTURN_SL; 
+			else accion=actTURN_SR;
+			break;
+
+		default:
+			//En el caso de que no se pueda andar se llamará recursivamente a la función 
+			//para tomar otra decisión.
+			if(puedoAndar(terreno,superficie)) accion=actFORWARD;
+			else accion=accionAleatoria(terreno,superficie);
+			break;
+	}
+	
+	return accion;
+}
+
+
+bool ComportamientoJugador:: puedoAndar(const vector<unsigned char> &terreno, const vector <unsigned char> &superficie)
+{
+	//Comprueba si el terreno es válido para avanzar. Con la variable current_state.comienzo controla si es el comienzo de
+	// la partida para no quedar atrapado en un terreno hasta el fin de la partida.
+	return  (((terreno[2] == 'T' or terreno[2] == 'S' or terreno[2] == 'G' or terreno[2] == 'K' or
+		 		 terreno[2] == 'D' or terreno[2] == 'X' or (terreno[2]== 'A' and power.biki) or 
+		 		(terreno[2] == 'B' and power.zapa) ) and superficie[2]=='_' and !hayLobos(superficie)) || current_state.comienzo);
+}
+
+/*
 pair<int,int> ComportamientoJugador::mirarMatriz(const vector<vector<unsigned char>> &terreno)
 {
 	vector<vector<unsigned char>>::const_iterator inicio=terreno.begin();
@@ -624,41 +685,4 @@ Action ComportamientoJugador::accionGuiada(pair<int,int> par, Action accion, con
 	return accion_g;
 
 }
-
-Action ComportamientoJugador:: accionAleatoria(const vector<unsigned char> &terreno, const vector <unsigned char> &superficie)
-{
-	Action accion;
-	int aux=rand()%8;
-	switch (aux)
-	{
-
-		case 0:
-			if(!puedoAndar(terreno,superficie)) accion=actTURN_BR;
-			else if( (terreno[1]=='P' && terreno[5]=='P') ||
-				(!power.biki && terreno[1]=='A' && terreno[5]=='A') ||
-				(!power.zapa && terreno[1]=='B' && terreno[5]=='B')) accion=actTURN_SR; 
-			else accion=actTURN_SL;
-			break;
-		case 1:
-			if(!puedoAndar(terreno,superficie)) accion=actTURN_BL;
-			else if( (terreno[3]=='P' && terreno[7]=='P')||
-				(!power.biki && terreno[3]=='A' && terreno[7]=='A') ||
-				(!power.zapa && terreno[3]=='B' && terreno[7]=='B')) accion=actTURN_SL; 
-			else accion=actTURN_SR;
-			break;
-
-		default:
-			if(puedoAndar(terreno,superficie)) accion=actFORWARD;
-			else accion=accionAleatoria(terreno,superficie);
-			break;
-	}
-	
-	return accion;
-}
-
-bool ComportamientoJugador:: puedoAndar(const vector<unsigned char> &terreno, const vector <unsigned char> &superficie)
-{
-	return  (((terreno[2] == 'T' or terreno[2] == 'S' or terreno[2] == 'G' or terreno[2] == 'K' or
-		 		 terreno[2] == 'D' or terreno[2] == 'X' or (terreno[2]== 'A' and power.biki) or 
-		 		(terreno[2] == 'B' and power.zapa) ) and superficie[2]=='_' and !hayLobos(superficie)) || current_state.comienzo);
-}
+*/

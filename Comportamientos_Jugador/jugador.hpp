@@ -55,15 +55,26 @@ class ComportamientoJugador : public Comportamiento{
 
     Action think(Sensores sensores);
     int interact(Action accion, int valor);
+
+    //Función encargada del pintado de la matriz con lo detectado con los sensores
     void PonerTerrenoEnMatriz(const vector<unsigned char> &terreno, const state &st,
 						  vector < vector< unsigned char >> & matriz);
+
+    //Función encargada de detectar si existen lobos en la superficie.
     bool hayLobos(const vector<unsigned char> &superficie);
+    
+    //Función encargada de detectar si existen aldeano en la superficie.
     bool hayAldeanos(const vector <unsigned char> &superficie);
-    pair<int,int> mirarMatriz(const vector<vector<unsigned char>> &terreno);
-    Action accionGuiada(pair<int,int> par, Action accion,const vector<unsigned char> &terreno, const vector<unsigned char> &superficie);
+    
+    //Genera una acción aleatoria dependiendo del terreno y la superficie tomada con los sensores.
     Action accionAleatoria(const vector <unsigned char> &terreno, const vector<unsigned char> &superficie);
+
+    //Comprueba si la casilla enfrente del robot es válida para poder moverse
     bool puedoAndar(const vector<unsigned char> &terreno, const vector <unsigned char> &superficie);
 
+
+    //pair<int,int> mirarMatriz(const vector<vector<unsigned char>> &terreno);
+    //Action accionGuiada(pair<int,int> par, Action accion,const vector<unsigned char> &terreno, const vector<unsigned char> &superficie);
   private:
   
   // Declarar aquí las variables de estado
