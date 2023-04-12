@@ -1,0 +1,24 @@
+MAPA 30x30
+	Nivel	Porcentaje	Sobre 85
+	0		       		       
+	1		       		       
+	2		       		       
+	3		       		       
+MAPA 50x50
+	Nivel	Porcentaje	Sobre 85
+	0		       		       
+	1		       		       
+	2		       		       
+	3		       		       
+MAPA 75x75
+	Nivel	Porcentaje	Sobre 85
+	0		       		       
+	1		       		       
+	2		       		       
+	3		       		       
+MAPA 100x100
+	Nivel	Porcentaje	Sobre 85
+	0		       		       
+	1		       		       
+	2		       		       
+	3		       		       
